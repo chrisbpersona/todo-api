@@ -78,6 +78,48 @@ app.delete('/todos/:id', function (req, res) {
 	}
 });
 
+// UPDATE API by todos/:id
+// 
+app.put('/todos/:id', function (req, res) {
+	var todoId = parseInt(req.params.id, 10);
+	var matchedTodo = _.findWhere(todos, {id: todoId});
+	var body = _.pick(req.body, 'description', 'completed');
+	var validAttributes = {};
+
+	if (!matchedTodo) {
+		return res.status(404).send();
+	}
+
+	// Validation on data to be updated
+	if (body.hasOwnProperty('completed') && _.isBoolean(body.completed)) {
+		validAttributes.completed = body.completed;
+	} else if (body.hasOwnProperty('completed')) {
+		// data was bad so handle it
+		return res.status(400).send();
+
+	} else {
+		// never provided attributed, no issue
+
+	}
+	if (body.hasOwnProperty('description') && _.isString(body.description) 
+		&& body.description.trim().length > 0) {
+		validAttributes.description= body.description;
+
+	} else if (body.hasOwnProperty('description')) {
+		// data was bad so handle it
+		return res.status(400).send();
+		
+	} else {
+		// never provided attributed, no issue
+
+	}
+
+	// Update using underscore extend ( passing by reference will update )
+	_.extend(matchedTodo, validAttributes);
+	res.json(matchedTodo);
+
+});
+
 
 app.listen(PORT, function () {
 	console.log('Express Service Listening on port ' + PORT);
