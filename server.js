@@ -1,6 +1,9 @@
+// Express web service
 var express = require('express');
-
+// Body-parser handles POST methods
 var bodyParser = require('body-parser');
+// Underscore api handling functions
+var _ = require('underscore');
 
 var app = express();
 
@@ -23,16 +26,8 @@ app.get('/todos', function(req, res) {
 // /todos/:id
 app.get('/todos/:id', function (req, res) {
 	var todoId = parseInt(req.params.id, 10);
-	var matchedTodo;
-
-	// Iterate over array; find the match
-	// set matchedTodo to the foudn item
-	todos.forEach(function (todo) {
-		if (todoId === todo.id) {
-
-				matchedTodo = todo;		
-		}
-	});
+	// search the array using underscore
+	var matchedTodo = _.findWhere(todos, {id: todoId});
 
 	if (matchedTodo) {
 		
@@ -47,15 +42,24 @@ app.get('/todos/:id', function (req, res) {
 // POST request for API body-parser lib used for this
 // /todos
 app.post('/todos', function(req, res) {
-	var body = req.body;
+	// Underscore pick to control accepted data from the body
+	var body = _.pick(req.body, 'description', 'completed');
+
+	// Underscore control the data validation
+	if (!_.isBoolean(body.completed) || !_.isString(body.description) 
+		|| body.description.trim().length === 0) {
+		return res.status(400).send();
+	};
+
+	// set body.description to be trimmed value to remove white spaces forward and trailing
+	body.description = body.description.trim();
+
 	// add a field
 	body.id = todoNextId;
 	todoNextId++;
 
 	// push onto the array
 	todos.push(body);
-
-	//console.log('description: ' + body.description);
 
 	res.json(body);
 });
