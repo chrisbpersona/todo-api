@@ -64,40 +64,57 @@ app.get('/todos', function(req, res) {
 // /todos/:id
 app.get('/todos/:id', function(req, res) {
 	var todoId = parseInt(req.params.id, 10);
-	// search the array using underscore
-	var matchedTodo = _.findWhere(todos, {
-		id: todoId
+
+// use with db
+// 
+
+	db.todo.findById(todoId).then(function (todo) {
+		if (!!todo) {
+			res.json(todo.toJSON());
+		} else {
+			res.status(404).send();
+		}
+	}, function (e) {
+		res.status(500).send();
 	});
 
-	if (matchedTodo) {
+// end use db
+// 
 
-		res.json(matchedTodo);
-	} else {
-		// If matchedTodo is not defined return
-		res.status(404).send();
-	}
+	// search the array using underscore
+	// var matchedTodo = _.findWhere(todos, {
+	// 	id: todoId
+	// });
+
+	// if (matchedTodo) {
+
+	// 	res.json(matchedTodo);
+	// } else {
+	// 	// If matchedTodo is not defined return
+	// 	res.status(404).send();
+	// }
 
 });
 
 // POST request for API body-parser lib used for this
 // /todos
 app.post('/todos', function(req, res) {
-		// Underscore pick to control accepted data from the body
+	// Underscore pick to control accepted data from the body
 	var body = _.pick(req.body, 'description', 'completed');
 
-// use the db
+	// use the db
 	// call create on db.todo
 	//respond to the api caller with 200 and value of todo object
 	// else pass e to res.status(400).JSON(e)
 
-db.todo.create(body).then(function (todo) {
-	res.json(todo.toJSON());
-}, function (e) {
-	res.status(400).json(e);
-})
+	db.todo.create(body).then(function(todo) {
+		res.json(todo.toJSON());
+	}, function(e) {
+		res.status(400).json(e);
+	})
 
-// end use the db
-// 
+	// end use the db
+	// 
 	// Underscore pick to control accepted data from the body
 	// var body = _.pick(req.body, 'description', 'completed');
 
